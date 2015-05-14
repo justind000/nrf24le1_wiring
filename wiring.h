@@ -111,7 +111,7 @@ w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t ww8data){
 uint8_t wireRead8(uint8_t slave_address, uint8_t address){
 	uint8_t wr8data = 0;
 
-	if(w2_master_random_address_read(slave_address, &address, 1, (uint8_t*)&wr8data, sizeof(wr8data)) ==  W2_NACK_VAL)
+	if(w2_master_random_address_read(slave_address, &address, 1, (uint8_t*)&wr8data, 1) ==  W2_NACK_VAL)
 	{
 		return W2_NACK_VAL;}
 	else{
@@ -122,7 +122,7 @@ uint8_t wireRead8(uint8_t slave_address, uint8_t address){
 uint16_t wireRead16(uint8_t slave_address, uint8_t address){
 	uint16_t wr16data = 0;
 
-	if(w2_master_random_address_read(slave_address, &address, 1, (uint8_t*)&wr16data, sizeof(wr16data)) ==  W2_NACK_VAL)
+	if(w2_master_random_address_read(slave_address, &address, 1, (uint8_t*)&wr16data, 2) ==  W2_NACK_VAL)
 	{
 		return W2_NACK_VAL;}
 	else{
