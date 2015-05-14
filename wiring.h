@@ -39,21 +39,14 @@
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 #define bit(b) (1UL << (b))
 
-#ifdef DEBUG
-	#undef DEBUG
-#endif
-
 typedef unsigned int word;
 typedef uint8_t boolean;
 typedef uint8_t byte;
 
-void setup();
-void loop();
 void putchar(char c);
 char getchar();
 void serialBegin();
 void wireBegin();
-void main();
 w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t data);
 uint8_t wireRead8(uint8_t slave_address, uint8_t address);
 uint16_t wireRead16(uint8_t slave_address, uint8_t address);
@@ -77,14 +70,7 @@ void serialBegin(){
 	uart_configure_8_n_1_38400();
 }
 
-//#ifdef DEBUG
 #define debugPrint(fmt, ...) do { if (DEBUG) printf_tiny(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
-//#else
-//#define debugPrint(fmt, ...) do {} while (0)
-//#endif
-
-
-
 
 void wireBegin(){
 	//Set up I2C hardware
