@@ -10,6 +10,10 @@
 #include "adc.h"
 #include "watchdog.h"
 
+#ifdef random
+	#undef random
+#endif
+
 #define digitalWrite gpio_pin_val_write
 #define digitalRead gpio_pin_val_read
 #define pinMode gpio_pin_configure
@@ -29,8 +33,8 @@
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
-#define interrupts() sei()
-#define noInterrupts() cli()
+#define interrupts() interrupt_control_global_enable()
+#define noInterrupts() interrupt_control_global_disable()
 #define lowByte(w) ((uint8_t) ((w) & 0xff))
 #define highByte(w) ((uint8_t) ((w) >> 8))
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
@@ -38,6 +42,11 @@
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 #define bit(b) (1UL << (b))
+#define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode)
+#define random rng_get_one_byte_and_turn_off
+#ifdef DEBUG
+	#undef DEBUG
+#endif
 
 typedef unsigned int word;
 typedef uint8_t boolean;
