@@ -9,6 +9,7 @@
 #include "pwm.h"
 #include "adc.h"
 #include "watchdog.h"
+#include "pwr_clk_mgmt.h"
 
 #ifdef random
 	#undef random
@@ -42,7 +43,10 @@
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 #define bit(b) (1UL << (b))
-#define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode)
+
+//PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE, PWR_CLK_MGMT_PWRDWN_MODE_STANDBY, PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
+//PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON, PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF, PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+#define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode) 
 #define random rng_get_one_byte_and_turn_off
 #ifdef DEBUG
 	#undef DEBUG
@@ -52,6 +56,8 @@ typedef unsigned int word;
 typedef uint8_t boolean;
 typedef uint8_t byte;
 
+void setup();
+void loop();
 void putchar(char c);
 char getchar();
 void serialBegin();
@@ -59,10 +65,19 @@ void wireBegin();
 w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t data);
 uint8_t wireRead8(uint8_t slave_address, uint8_t address);
 uint16_t wireRead16(uint8_t slave_address, uint8_t address);
-void analogSetup();
-#define watchdogRun(p1) watchdog_start_and_set_timeout_in_ms(p1);CLKLFCTRL=1;
+void gpioSetup();
+#define watchdogRun(p1) watchdog_start_and_set_timeout_in_ms(p1);CLKLFCTRL=1
+interrupt_isr_rfirq();
 
-void analogSetup(){
+void main(){
+	wireBegin();
+	gpioSetup();
+	setup();
+
+	while(1){loop();}
+}
+
+void gpioSetup(){
 	adc_configure (ADC_CONFIG_OPTION_RESOLUTION_12_BITS|ADC_CONFIG_OPTION_REF_SELECT_VDD |ADC_CONFIG_OPTION_RESULT_JUSTIFICATION_RIGHT);
 	pwm_configure(PWM_CONFIG_OPTION_PRESCALER_VAL_10 || PWM_CONFIG_OPTION_WIDTH_8_BITS);
 }
@@ -102,9 +117,9 @@ void putchar(char c)
                                                                                                                                                                                                                                             
 char getchar()
 {
-	// unsigned char retchar;
-	// retchar = uart_wait_for_rx_and_get();
-	return 0;
+	unsigned char retchar;
+	retchar = uart_wait_for_rx_and_get();
+	return retchar;
 }
 
 w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t ww8data){
