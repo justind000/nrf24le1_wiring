@@ -1,5 +1,4 @@
 #include "wiring.h"
-#include "nrf.h"
 
 #define DEBUG 1
 
