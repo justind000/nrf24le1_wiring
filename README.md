@@ -5,9 +5,9 @@ Go to https://hackaday.io/project/5794-nrf24le1-wiring-library for more details
 
 #Basics
 ####pinMode, digitalRead, digitalWrite, analogRead, analogWrite
-`pinMode(PX_D0, INPUT | PULLUP);`
-`digitalRead(PX_D0);`
-`digitalWrite(PX_D0, HIGH);`
+`pinMode(P0_0, INPUT | PULLUP);`
+`digitalRead(P0_0);`
+`digitalWrite(P0_0, HIGH);`
 
 pinMode is slightly different in that you `|` together the options which are:
 * PULLUP
@@ -22,18 +22,20 @@ pinMode is slightly different in that you `|` together the options which are:
 `noPullup()` and `pullup()` are absent and rolled into `pinMode()`
 
 #####Analog and PWM Functions
-ADC is setup for 12 bit resolution, PWM pre-scaler to 10 and width to 8 bits. 
+ADC is setup in 12 bit resolution, PWM pre-scaler to 10 and width to 8 bits. 
 
 ####Interupts
 Not implemented yet but `'interupts()` and `noInterrupts()` work as expected.
 
 ####Timing
 `millis()` not implemented yet
+
 `delay()` and `delayMilliseconds()` work as expected
 
 ####Serial
 `serialBegin()` setups up at 38400 8n1
-print and println are not implemented
+
+Print and Println are not implemented
 
 `debugPrint(format, args)` is a macro that wraps `printf_tiny()` and is enabled if DEBUG is defined:
 
@@ -41,10 +43,15 @@ print and println are not implemented
 `debugPrint("nrf24le1 version %u", 1);`
 
 ####I2C
-`wireBegin()` is called in `main()` and sets up I2C in master mode at 400kHz. 
+Automatically set up in master mode at 400kHz. I would like this to be made more Wiring-like. 
 
 `wireWrite8(slave address, data)` returns W2_NACK_VAL or W2_ACK_VAL
 
 `wireRead8(slave address, address)` returns W2_NACK_VAL or W2_ACK_VAL
 
 `wireRead16(slave address, address)` returns W2_NACK_VAL or W2_ACK_VAL
+
+####Pins
+Are defined as `P0_0` `P1_1`etc. 
+
+gpio.h has defines for all three variants and also the special names for the pins which can be used as well. 
