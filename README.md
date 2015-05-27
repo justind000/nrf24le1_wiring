@@ -28,7 +28,7 @@ pinMode is slightly different in that you `|` together the options which are:
 ADC is setup in 12 bit resolution, PWM pre-scaler to 10 and width to 8 bits. 
 
 ####Interrupts
-Not implemented yet but `'interrupts()` and `noInterrupts()` work as expected. See interrupt.h for the vector definitions. 
+Not implemented yet but `interrupts()` and `noInterrupts()` work as expected. See interrupt.h for the vector definitions. 
 
 ####Timing
 `millis()` not implemented yet
