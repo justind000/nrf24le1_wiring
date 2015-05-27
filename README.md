@@ -3,7 +3,7 @@ A Wiring-like wrapper to use the nrf24le1 SoC
 
 Go to https://hackaday.io/project/5794-nrf24le1-wiring-library for more details
 
-#Basics
+##Usage
 ####pinMode, digitalRead, digitalWrite, analogRead, analogWrite
 
 `pinMode(P0_0, INPUT | PULLUP);`
