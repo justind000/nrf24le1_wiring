@@ -5,8 +5,11 @@ Go to https://hackaday.io/project/5794-nrf24le1-wiring-library for more details
 
 #Basics
 ####pinMode, digitalRead, digitalWrite, analogRead, analogWrite
+
 `pinMode(P0_0, INPUT | PULLUP);`
+
 `digitalRead(P0_0);`
+
 `digitalWrite(P0_0, HIGH);`
 
 pinMode is slightly different in that you `|` together the options which are:
@@ -24,8 +27,8 @@ pinMode is slightly different in that you `|` together the options which are:
 #####Analog and PWM Functions
 ADC is setup in 12 bit resolution, PWM pre-scaler to 10 and width to 8 bits. 
 
-####Interupts
-Not implemented yet but `'interupts()` and `noInterrupts()` work as expected.
+####Interrupts
+Not implemented yet but `'interrupts()` and `noInterrupts()` work as expected. See interrupt.h for the vector definitions. 
 
 ####Timing
 `millis()` not implemented yet
