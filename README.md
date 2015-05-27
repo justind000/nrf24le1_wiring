@@ -1,4 +1,4 @@
-# nrf24le1 Wiring
+# nrf24le1 Wiring Library
 A Wiring-like wrapper to use the nrf24le1 SoC
 
 Go to https://hackaday.io/project/5794-nrf24le1-wiring-library for more details
