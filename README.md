@@ -66,6 +66,9 @@ Automatically set up in master mode at 400kHz. I would like this to be made more
 * PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
 * PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
 
+####Random Number Generator
+The nrf24le1 has an onboad RNG. The std `random()` has been replaced by the board RNG and returns a random byte. 
+
 ####Pins
 Are defined as `P0_0` `P1_1`etc. 
 
