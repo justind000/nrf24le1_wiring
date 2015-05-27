@@ -36,7 +36,7 @@ Not implemented yet but `'interrupts()` and `noInterrupts()` work as expected. S
 `delay()` and `delayMilliseconds()` work as expected
 
 ####Serial
-`serialBegin()` setups up at 38400 8n1
+`serialBegin()` sets up up at 38400 8n1
 
 Print and Println are not implemented
 
