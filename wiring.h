@@ -10,6 +10,7 @@
 #include "adc.h"
 #include "watchdog.h"
 #include "pwr_clk_mgmt.h"
+#include "timer0.h"
 
 #ifdef random
 	#undef random
@@ -46,6 +47,12 @@
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 #define bit(b) (1UL << (b))
 
+#define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
+//LOW 
+#define attachInterrupt(p1, p2) interrupt_configure_ifp(p1, p2 | INTERRUPT_IFP_CONFIG_OPTION_ENABLE)
+#define detachInterrupt(p1) interrupt_configure_ifp(p1, INTERRUPT_IFP_CONFIG_OPTION_DISABLE)
+#define ISR(p1) void isr##p1() __interrupt(p1)
+
 #define PULLDOWN GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_DOWN_RESISTOR
 #define PULLUP GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_UP_RESISTOR
 
@@ -57,6 +64,38 @@
 	#undef DEBUG
 #endif
 
+#define TLSTART 256-16000000/1000/12/6
+unsigned long ml=0;
+uint8_t mcs=0;
+uint8_t ofcount=0;
+
+ISR(INTERRUPT_VECTOR_T0){
+	TL0 = TLSTART;
+  
+	if (mcs>=6)
+	{
+		ml++;
+		mcs=0;
+  
+		if (ml>4294967294)
+		{
+			ofcount=1;
+			ml=0;
+		}
+	}
+
+	mcs++;
+}
+
+void millisBegin()
+{
+	interrupt_control_global_enable();
+	interrupt_control_t0_enable()	;
+	timer0_configure(TIMER0_CONFIG_OPTION_MODE_3_TWO_8_BIT_CTRS_TMRS,TLSTART);
+	timer0_run();
+
+}
+#define millis() ml
 
 #define P0_0 GPIO_PIN_ID_P0_0
 #define P0_1 GPIO_PIN_ID_P0_1
@@ -90,6 +129,13 @@
 #define P3_5 GPIO_PIN_ID_P3_5
 #define P3_6 GPIO_PIN_ID_P3_6
 
+#define ACTIVE PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
+#define STANDBY PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
+#define REGISTER_RET PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
+#define MEMORY_TIMER_ON PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
+#define MEMORY_TIMER_OFF PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
+#define DEEP PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+
 typedef unsigned int word;
 typedef uint8_t boolean;
 typedef uint8_t byte;
@@ -107,13 +153,14 @@ uint8_t wireRead8(uint8_t slave_address, uint8_t address);
 uint16_t wireRead16(uint8_t slave_address, uint8_t address);
 void gpioSetup();
 #define watchdogRun(p1) watchdog_start_and_set_timeout_in_ms(p1);CLKLFCTRL=1
-interrupt_isr_rfirq();
+//interrupt_isr_rfirq();
 unsigned int i = 0;
 unsigned char control_byte, address_byte, data_byte;
 
 void main(){
 	wireBegin();
 	gpioSetup();
+
 	setup();
 
 	while(1){loop();}
