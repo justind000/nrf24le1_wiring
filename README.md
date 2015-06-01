@@ -100,3 +100,8 @@ The nrf24le1 has an onboad RNG. The cstd `random()` has been replaced by the boa
 Are defined as `P0_0` `P1_1`etc. 
 
 gpio.h has defines for all three variants and also the special names for the pins which can be used as well. 
+
+####AES Accelerator
+The chip includes a hardware galois multiplication function.
+
+`uint8_t aesGaloisMultiply(uint8_t value1, uint8_t value2)`
