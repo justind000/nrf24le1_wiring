@@ -28,10 +28,37 @@ pinMode is slightly different in that you `|` together the options which are:
 ADC is setup in 12 bit resolution, PWM pre-scaler to 10 and width to 8 bits. 
 
 ####Interrupts
-Not implemented yet but `interrupts()` and `noInterrupts()` work as expected. See interrupt.h for the vector definitions. 
+`interrupts()`, `noInterrupts()`, `detachInterrupt()` work as expected.
+
+`attachInterrupt(GP_INT, condition)` is slightly different in that there is no function argument, conditions are `LOW` and `FALLING`. You need to write an ISR for `INTERRUPT_VECTOR_IFP`. Depending on your chip, the GPINT options are
+* INTERRUPT_IFP_INPUT_GPINT0 //P0.0 on 24-pin, P0.5 on 32-pin, P1.2 on 48-pin
+* INTERRUPT_IFP_INPUT_GPINT1 //P0.2 on 24-pin, P0.6 on 32-pin, P1.3 on 48-pin
+* INTERRUPT_IFP_INPUT_GPINT2 //Not present on 24-pin or 32-pin, P1.4 on 48-pin
+
+You can define an ISR like
+
+```
+ISR(INTERRUPT_VECTOR_IFP){
+  //do something
+}
+```
+
+The list of vectors:
+* INTERRUPT_VECTOR_IFP
+* INTERRUPT_VECTOR_T0
+* INTERRUPT_VECTOR_PWR_FAIL
+* INTERRUPT_VECTOR_T1
+* INTERRUPT_VECTOR_UART
+* INTERRUPT_VECTOR_T2
+* INTERRUPT_VECTOR_RFRDY
+* INTERRUPT_VECTOR_RFIRQ
+* INTERRUPT_VECTOR_SPI_2WIRE
+* INTERRUPT_VECTOR_WU_ON_PIN
+* INTERRUPT_VECTOR_XOSC_ADC_RNG
+* INTERRUPT_VECTOR_RTC2
 
 ####Timing
-`millis()` not implemented yet
+`millis()` is implemented using timer0. Due to it's use of system resources, it is not started automatically. `millisBegin()` will start it. Thanks to maksms' GitHub repo for this routine. Access it through `millis()` which is a uint32_t. (Note `debugPrint()` doesn't display 32 bit numbers.) 
 
 `delay()` and `delayMilliseconds()` work as expected
 
@@ -59,12 +86,12 @@ Automatically set up in master mode at 400kHz. I would like this to be made more
 
 ####Sleep Modes
 `sleep(mode)` will enter the passed mode. Modes are:
-* PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
-* PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
-* PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
-* PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
-* PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
-* PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+* ACTIVE
+* STANDBY
+* REGISTER_RET
+* MEMORY_RET_TMR_ON
+* MEMORY_RET_TMR_OFF
+* DEEP_SLEEP
 
 ####Random Number Generator
 The nrf24le1 has an onboad RNG. The cstd `random()` has been replaced by the board RNG and returns a random byte. 
