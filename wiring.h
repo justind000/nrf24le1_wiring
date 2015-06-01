@@ -267,4 +267,11 @@ void eepromWrite(uint16_t address, uint8_t value){
 		return;
 	}
 }
+
+uint8_t aesGaloisMultiply(uint8_t value1, uint8_t value2)
+{
+	CCPDATIA = value1;
+	CCPDATIB = value2;
+	return CCPDATO;
+}
 #endif
