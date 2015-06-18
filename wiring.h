@@ -34,18 +34,13 @@
 #define abs(x) ((x)>0?(x):-(x))
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-#define radians(deg) ((deg)*DEG_TO_RAD)
-#define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 #define interrupts() interrupt_control_global_enable()
 #define noInterrupts() interrupt_control_global_disable()
 #define lowByte(w) ((uint8_t) ((w) & 0xff))
 #define highByte(w) ((uint8_t) ((w) >> 8))
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
-#define bitSet(value, bit) ((value) |= (1UL << (bit)))
-#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
-#define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
-#define bit(b) (1UL << (b))
+
 
 #define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
 //LOW 
@@ -76,12 +71,6 @@ ISR(INTERRUPT_VECTOR_T0){
 	{
 		ml++;
 		mcs=0;
-  
-		if (ml>4294967294)
-		{
-			ofcount=1;
-			ml=0;
-		}
 	}
 
 	mcs++;
@@ -167,7 +156,7 @@ void main(){
 }
 
 void gpioSetup(){
-	adc_configure (ADC_CONFIG_OPTION_RESOLUTION_12_BITS|ADC_CONFIG_OPTION_REF_SELECT_VDD |ADC_CONFIG_OPTION_RESULT_JUSTIFICATION_RIGHT);
+	adc_configure ((uint16_t)ADC_CONFIG_OPTION_RESOLUTION_12_BITS|ADC_CONFIG_OPTION_REF_SELECT_VDD |ADC_CONFIG_OPTION_RESULT_JUSTIFICATION_RIGHT);
 	pwm_configure(PWM_CONFIG_OPTION_PRESCALER_VAL_10 || PWM_CONFIG_OPTION_WIDTH_8_BITS);
 }
 
