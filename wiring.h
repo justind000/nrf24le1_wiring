@@ -1,7 +1,25 @@
+// Copyright (C) 2015 Justin Decker
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 #ifndef Wiring_h
 #define Wiring_h
 #include <stdio.h>
 #include <stdarg.h>
+#include <ctype.h>
+#include <math.h>
 #include "gpio.h"
 #include "uart.h"
 #include "rng.h"
@@ -12,57 +30,99 @@
 #include "pwr_clk_mgmt.h"
 #include "timer0.h"
 
-#ifdef random
-	#undef random
-#endif
-
+//Input / Output
 #define digitalWrite gpio_pin_val_write
 #define digitalRead gpio_pin_val_read
 #define pinMode gpio_pin_configure
-#define OUTPUT GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT
-#define INPUT GPIO_PIN_CONFIG_OPTION_DIR_INPUT
 #define HIGH_POWER GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_HIGH_DRIVE_STRENGTH
 #define NORMAL_POWER GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH
-#define LOW 0
-#define HIGH 1
-#define delay delay_ms
-#define delayMilliseconds delay_us
+#define PULLDOWN GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_DOWN_RESISTOR
+#define PULLUP GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_UP_RESISTOR
 #define analogWrite pwm_start
 #define analogRead adc_start_single_conversion_get_value
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
-#define abs(x) ((x)>0?(x):-(x))
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-#define sq(x) ((x)*(x))
-#define interrupts() interrupt_control_global_enable()
-#define noInterrupts() interrupt_control_global_disable()
+
+//Data
 #define lowByte(w) ((uint8_t) ((w) & 0xff))
 #define highByte(w) ((uint8_t) ((w) >> 8))
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 
 
-#define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
-//LOW 
+//Interrupts
 #define attachInterrupt(p1, p2) interrupt_configure_ifp(p1, p2 | INTERRUPT_IFP_CONFIG_OPTION_ENABLE)
 #define detachInterrupt(p1) interrupt_configure_ifp(p1, INTERRUPT_IFP_CONFIG_OPTION_DISABLE)
 #define ISR(p1) void isr##p1() __interrupt(p1)
+#define interrupts() interrupt_control_global_enable()
+#define noInterrupts() interrupt_control_global_disable()
 
-#define PULLDOWN GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_DOWN_RESISTOR
-#define PULLUP GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_UP_RESISTOR
+//Calculation
+#define abs(x) ((x)>0?(x):-(x))
+#define ceil ceilf
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define exp expf
+#define fabs fabsf 
+#define floor floorf 
+//#define fma 
+//#define fmax
+//#define fmin
+//#define fmod
+#define ldexp ldexpf 
+#define log logf 
+#define log10 log10f 
+//#define map
+#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a,b) ((a)<(b)?(a):(b))
+#define pow powf 
+#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+//#define signbit
+#define sq(x) ((x)*(x))
+#define sqrt sqrtf 
+//#define square
+//#define trunc
 
-//PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE, PWR_CLK_MGMT_PWRDWN_MODE_STANDBY, PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
-//PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON, PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF, PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+//Trigonometry
+#define acos acosf 
+#define asin asinf 
+#define atan atanf 
+#define atan2 atan2f 
+#define cos cosf 
+// #define degrees
+// #define hypot
+// #define radians
+#define sin sinf 
+#define sinh sinhf 
+#define tan tanf 
+#define tanh tanhf 
+
+//Constants
+#define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
+#define HIGH 1
+#define INPUT GPIO_PIN_CONFIG_OPTION_DIR_INPUT
+#define LOW 0
+// #define LSBFIRST
+// #define MSBFIRST
+#define OUTPUT GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT
+
+//Sleep modes
+#define ACTIVE PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
+#define STANDBY PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
+#define REGISTER_RET PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
+#define MEMORY_TIMER_ON PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
+#define MEMORY_TIMER_OFF PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
+#define DEEP_SLEEP PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+
 #define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode) 
-#define random rng_get_one_byte_and_turn_off
-#ifdef DEBUG
-	#undef DEBUG
-#endif
 
+//HW random - returns byte
+#define random rng_get_one_byte_and_turn_off
+
+//Time
+#define delay delay_ms
+#define delayMilliseconds delay_us
+
+// millis() implementation
 #define TLSTART 256-16000000/1000/12/6
 unsigned long ml=0;
-uint8_t mcs=0;
-uint8_t ofcount=0;
+uint8_t mcs=0;	
 
 ISR(INTERRUPT_VECTOR_T0){
 	TL0 = TLSTART;
@@ -86,6 +146,7 @@ void millisBegin()
 }
 #define millis() ml
 
+//Pin definitions
 #define P0_0 GPIO_PIN_ID_P0_0
 #define P0_1 GPIO_PIN_ID_P0_1
 #define P0_2 GPIO_PIN_ID_P0_2
@@ -118,12 +179,20 @@ void millisBegin()
 #define P3_5 GPIO_PIN_ID_P3_5
 #define P3_6 GPIO_PIN_ID_P3_6
 
-#define ACTIVE PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
-#define STANDBY PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
-#define REGISTER_RET PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
-#define MEMORY_TIMER_ON PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
-#define MEMORY_TIMER_OFF PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
-#define DEEP_SLEEP PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+//Character classification
+#define isAlpha isalpha
+#define isAlphaNumeric isalnum
+#define isASCII isascii
+#define isControl iscntrl
+#define isDigit isdigit
+#define isGraph isgraph 
+#define isHexadecimalDigit isxdigit 
+#define isLowerCase islower 
+#define isPrintable isprint 
+#define isPunct ispunct 
+#define isSpace isspace
+#define isUpperCase isupper 
+#define isWhitespace isspace 
 
 typedef unsigned int word;
 typedef uint8_t boolean;
