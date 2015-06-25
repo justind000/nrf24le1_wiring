@@ -65,15 +65,30 @@ The list of vectors:
 ####Serial
 `serialBegin()` sets up up at 38400 8n1 which is the maximum speed. 
 
-`serialPrint` and `serialPrintLn` are implemented as wrappers to `printf_small()`
+`serialPrint` and `serialPrintLn` are implemented as wrappers to `printf_small(format, args)`
 
 `serialPrint("wiring wrapper version %u", 1);`
 
-`debugPrint(format, args)` is a macro that wraps `printf_small()` and is enabled if DEBUG is defined:
+`debugPrint(format, args)` and `debugPrintLn(format, args)` are macros that wrap `printf_small()` and is enabled if DEBUG is defined:
 
 `debugPrint("nrf24le1 with no args", 0);`
 `debugPrint("nrf24le1 version %u", 1);`
 
+format|output type|argument-type
+------|-----------|-------------
+%d|decimal|int
+%ld|decimal|long
+%hd|decimal|char
+%x|hexadecimal|int
+%lx|hexadecimal|long
+%hx|hexadecimal|char
+%o|octal|int
+%lo|octal|long
+%ho|octal|char
+%c|character|char
+%s|character|generic pointer
+%f|float|float
+     
 ####I2C
 Automatically set up in master mode at 400kHz. I would like this to be made more Wiring-like. 
 
