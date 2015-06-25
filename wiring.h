@@ -29,6 +29,10 @@
 #include "watchdog.h"
 #include "pwr_clk_mgmt.h"
 #include "timer0.h"
+#include "interrupt.h"
+
+#define debugPrint(fmt, ...) do { if (DEBUG) printf_small(fmt, __VA_ARGS__); } while (0)
+#define debugPrintLn(fmt, ...) do { if (DEBUG) printf_small(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
 
 //Input / Output
 #define digitalWrite gpio_pin_val_write
@@ -131,8 +135,8 @@ ISR(INTERRUPT_VECTOR_T0){
 	{
 		ml++;
 		mcs=0;
+		
 	}
-
 	mcs++;
 }
 
@@ -203,47 +207,21 @@ void loop();
 void putchar(char c);
 char getchar();
 void serialBegin();
-void wireBegin();
 uint8_t eepromRead(uint16_t address);
 void eepromWrite(uint16_t address, uint8_t value);
 w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t data);
 uint8_t wireRead8(uint8_t slave_address, uint8_t address);
 uint16_t wireRead16(uint8_t slave_address, uint8_t address);
-void gpioSetup();
 #define watchdogRun(p1) watchdog_start_and_set_timeout_in_ms(p1);CLKLFCTRL=1
-//interrupt_isr_rfirq();
+
 unsigned int i = 0;
 unsigned char control_byte, address_byte, data_byte;
 
 void main(){
-	wireBegin();
-	gpioSetup();
-
-	setup();
-
-	while(1){loop();}
-}
-
-void gpioSetup(){
+	//gpio setup
 	adc_configure ((uint16_t)ADC_CONFIG_OPTION_RESOLUTION_12_BITS|ADC_CONFIG_OPTION_REF_SELECT_VDD |ADC_CONFIG_OPTION_RESULT_JUSTIFICATION_RIGHT);
 	pwm_configure(PWM_CONFIG_OPTION_PRESCALER_VAL_10 || PWM_CONFIG_OPTION_WIDTH_8_BITS);
-}
 
-void serialBegin(){
-
-	//Set up UART pin
-	gpio_pin_configure(GPIO_PIN_ID_FUNC_TXD,
-					   GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT |
-					   GPIO_PIN_CONFIG_OPTION_OUTPUT_VAL_SET |
-					   GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH);
-
-	//Set up UART
-	uart_configure_8_n_1_38400();
-}
-
-#define debugPrint(fmt, ...) do { if (DEBUG) printf_tiny(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
-
-void wireBegin(){
 	//Set up I2C hardware
 	gpio_pin_configure(GPIO_PIN_ID_FUNC_W2SCL,
 					   GPIO_PIN_CONFIG_OPTION_DIR_INPUT |
@@ -254,7 +232,29 @@ void wireBegin(){
 					   GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_UP_RESISTOR);
 
 	w2_configure(W2_CONFIG_OPTION_ENABLE | W2_CONFIG_OPTION_MODE_MASTER | W2_CONFIG_OPTION_CLOCK_FREQ_400_KHZ | W2_CONFIG_OPTION_ALL_INTERRUPTS_ENABLE, 0);
+
+	setup();
+	while(1){loop();}
 }
+
+void serialBegin(){
+
+	//Set up UART pin
+	gpio_pin_configure(GPIO_PIN_ID_FUNC_TXD,
+					   GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT |
+					   GPIO_PIN_CONFIG_OPTION_OUTPUT_VAL_SET |
+					   GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH);
+
+	gpio_pin_configure(GPIO_PIN_ID_FUNC_RXD,
+					   GPIO_PIN_CONFIG_OPTION_DIR_INPUT |
+					   GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_NO_RESISTORS);
+
+	//Set up UART
+	uart_configure_8_n_1_38400();
+}
+
+#define serialPrint(fmt, ...) do { printf_small(fmt, __VA_ARGS__);} while (0)
+#define serialPrintLn(fmt, ...) do { printf_small(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
 
 void putchar(char c)
 {
@@ -269,7 +269,7 @@ char getchar()
 	return retchar;
 }
 
-w2_ack_nack_val_t wireWrite8	(uint8_t slave_address, uint8_t ww8data){
+w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t ww8data){
 	
 	if(w2_master_write_to(slave_address, &ww8data, 1, 0, 0) ==  W2_NACK_VAL)
 	{
