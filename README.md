@@ -58,16 +58,18 @@ The list of vectors:
 * INTERRUPT_VECTOR_RTC2
 
 ####Timing
-`millis()` is implemented using timer0. Due to it's use of system resources, it is not started automatically. `millisBegin()` will start it. Thanks to maksms' GitHub repo for this routine. Access it through `millis()` which is a uint32_t. (Note `debugPrint()` doesn't display 32 bit numbers.) 
+`millis()` is implemented using timer0. Due to it's use of system resources, it is not started automatically. `millisBegin()` will start it. Thanks to maksms' GitHub repo for this routine. Access it through `millis()` which is a uint32_t. 
 
 `delay()` and `delayMilliseconds()` work as expected
 
 ####Serial
-`serialBegin()` sets up up at 38400 8n1
+`serialBegin()` sets up up at 38400 8n1 which is the maximum speed. 
 
-Print and Println are not implemented
+`serialPrint` and `serialPrintLn` are implemented as wrappers to `printf_small()`
 
-`debugPrint(format, args)` is a macro that wraps `printf_tiny()` and is enabled if DEBUG is defined:
+`serialPrint("wiring wrapper version %u", 1);`
+
+`debugPrint(format, args)` is a macro that wraps `printf_small()` and is enabled if DEBUG is defined:
 
 `debugPrint("nrf24le1 with no args", 0);`
 `debugPrint("nrf24le1 version %u", 1);`
