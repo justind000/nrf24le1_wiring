@@ -87,8 +87,9 @@ format|output type|argument-type
 %ho|octal|char
 %c|character|char
 %s|character|generic pointer
-%f|float|float
-     
+%f|float|float*
+
+<sup>SDCC is not compiled by default with float support</sup>
 ####I2C
 Automatically set up in master mode at 400kHz. I would like this to be made more Wiring-like. 
 
