@@ -1,6 +1,25 @@
+// Copyright (C) 2015 Justin Decker
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation, either version 
+// 3 of the License, or (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// Original (C) 2011 J. Coliz <maniacbug@ymail.com> released under GNU 
+// General Public License 2
+
 #ifndef RF24_H_
 #define RF24_H_
 
+#include <string.h>
 #include "reg24le1.h"
 #include "rf.h"
 #include "adc.h"
@@ -26,10 +45,21 @@
 #define RX_P_NO     1
 #define PRIM_RX     0
 #define EN_ACK_PAY  1
+#define DPL_P5	    5
+#define DPL_P4	    4
+#define DPL_P3	    3
+#define DPL_P2	    2
+#define DPL_P1	    1
+#define DPL_P0	    0
+#define EN_DPL	    2
+#define CD          0x09
 
 typedef enum { RF24_PA_MIN = 0,RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX, RF24_PA_ERROR } rf24_pa_dbm_e ;
 typedef enum { RF24_1MBPS = 0, RF24_2MBPS, RF24_250KBPS } rf24_datarate_e;
 typedef enum { RF24_CRC_DISABLED = 0, RF24_CRC_8, RF24_CRC_16 } rf24_crclength_e;
+
+uint8_t pipe0_reading_address[5];
+uint8_t addr_width = 5;
 
 void setDataRate(unsigned char speed);
 void openWritingPipe(byte address1, byte address2, byte address3, byte address4, byte address5);
@@ -38,14 +68,25 @@ void setAutoAck(unsigned char enable);
 void setCRCLength(unsigned char length);
 void setPALevel(unsigned char level);
 void setRetries(uint8_t delay, uint8_t count);
+void setAddressWidth(uint8_t a_width);
 unsigned char available(uint8_t* pipe_num);
 void openReadingPipe(uint8_t child, byte address1, byte address2, byte address3, byte address4, byte address5);
-void startListening(void);
+void startListening();
 void closeReadingPipe( uint8_t pipe );
-void stopListening(void);
-rf24_pa_dbm_e getPALevel(void);
-rf24_datarate_e getDataRate(void);
-rf24_crclength_e getCRCLength(void);
+void stopListening();
+void whatHappened(bool *tx_ok, bool *tx_fail, bool *rx_ready);
+uint8_t getDynamicPayloadSize();
+void enableDynamicPayloads();
+bool testRPD();
+bool testCarrier();
+rf24_pa_dbm_e getPALevel();
+rf24_datarate_e getDataRate();
+rf24_crclength_e getCRCLength();
+#define powerUp() rf_power_up(true);
+#define powerDown() rf_power_down();
+
+
+
 #define write(p1, p2, p3) rf_write_tx_payload_noack(p1, p2, true); while(!(rf_irq_pin_active() && rf_irq_tx_ds_active()));
 #define read(p1, p2) rf_read_rx_payload(p1, p2);
 
@@ -103,6 +144,17 @@ void setPALevel(unsigned char level)
 
 }
 
+void setAddressWidth(uint8_t a_width){
+	uint8_t aw;
+
+	if(a_width -= 2)
+	{
+		aw = a_width%4;
+		rf_write_register(RF_SETUP_AW,& aw, 1);
+		addr_width = (a_width%4) + 2;
+	}
+
+}
 void openReadingPipe(uint8_t child, byte address1, byte address2, byte address3, byte address4, byte address5)
 {
 	uint8_t setup;
@@ -113,9 +165,14 @@ void openReadingPipe(uint8_t child, byte address1, byte address2, byte address3,
 	orpdata[3]=address2;
 	orpdata[4]=address1;
 
+	if (child == 0)
+	{
+		memcpy((const uint8_t*)pipe0_reading_address, &orpdata, addr_width);
+	}
+
     // For pipes 2-5, only write the LSB
     if ( child < 2 ) { 
-		rf_write_register(RF_RX_ADDR_P0 + child, (const uint8_t*)(&orpdata), 5);
+		rf_write_register(RF_RX_ADDR_P0 + child, (const uint8_t*)(&orpdata), addr_width);
     } else
 		rf_write_register(RF_RX_ADDR_P0 + child, (const uint8_t*)(&orpdata[0]), 1);
 	// rf_read_register(RF_RX_ADDR_P0+ child,(uint8_t*)(&data),5);printf_tiny("%x ", data[0]);
@@ -140,8 +197,8 @@ void openWritingPipe(byte address1, byte address2, byte address3, byte address4,
 	owpdata[3]=address2;
 	owpdata[4]=address1;
  
-	rf_write_register(RF_RX_ADDR_P0, (uint8_t*)(&owpdata), 5);
-	rf_write_register(RF_TX_ADDR, (uint8_t*)(&owpdata), 5);
+	rf_write_register(RF_RX_ADDR_P0, (uint8_t*)(&owpdata), addr_width);
+	rf_write_register(RF_TX_ADDR, (uint8_t*)(&owpdata), addr_width);
   
 	setup=32;
 	rf_write_register(RF_RX_PW_P0,&setup,1);
@@ -150,33 +207,34 @@ void openWritingPipe(byte address1, byte address2, byte address3, byte address4,
 
 unsigned char available(uint8_t* pipe_num)
 {
-  unsigned char buffer;
-  uint8_t status = rf_get_status();
+	unsigned char buffer;
+	uint8_t status = rf_get_status();
 
+	uint8_t result = ( status & _BV(RX_DR) );
 
- uint8_t result = ( status & _BV(RX_DR) );
-
-  if (result)
-  {
-    // If the caller wants the pipe number, include that
-  //  if ( pipe_num )
-      *pipe_num = ( status >> RX_P_NO ) & 7;
-
-    buffer=64;// _BV(RX_DR);
-    rf_write_register(STATUS,&buffer,1 ); 
-
-    // Handle ack payload receipt
-    // if ( status & _BV(TX_DS) )
-    // {
-    // buffer=32;// _BV(TX_DS);
-    // rf_write_register(STATUS,&buffer,1 );
-    // }
-  }
+	if (result)
+	{
+	// If the caller wants the pipe number, include that
+	//  if ( pipe_num )
+		*pipe_num = ( status >> RX_P_NO ) & 7;
+		buffer=64;// _BV(RX_DR);
+		rf_write_register(STATUS,&buffer,1 ); 
+	}
 
   return result;
 }
 
 void startListening(void){
+	// Restore the pipe0 adddress, if exists
+	if (pipe0_reading_address[0] > 0)
+	{
+    	rf_write_register(RF_RX_ADDR_P0, (uint8_t*)pipe0_reading_address, addr_width);	
+  	}
+  	else
+  	{
+		closeReadingPipe(0);
+	}
+
 	rf_irq_clear_all(); //clear interrupts again
 	rf_set_as_rx(true); //resume normal operation as an RX
 }
@@ -192,6 +250,41 @@ void closeReadingPipe( uint8_t pipe ){
 void stopListening(void){
 	rf_irq_clear_all(); //clear all interrupts in the 24L01
 	rf_set_as_tx(); //change the device to a TX
+}
+
+void whatHappened(bool *tx_ok,bool *tx_fail,bool *rx_ready){
+
+  // Read the status & reset the status in one easy call
+  uint8_t whstatus;
+  whstatus = rf_write_register(STATUS, (_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT)), 1 );
+
+  // Report to the user what happened
+  *tx_ok = whstatus & _BV(TX_DS);
+  *tx_fail = whstatus & _BV(MAX_RT);
+  *rx_ready = whstatus & _BV(RX_DR);
+
+}
+
+uint8_t getDynamicPayloadSize(){
+
+	uint8_t dps;
+	rf_spi_execute_command(RF_R_RX_PL_WID, (uint8_t*)&dps, 1, true);
+	return dps;
+}
+
+void enableDynamicPayloads(){
+
+	rf_write_register(FEATURE,rf_read_register_1_byte(FEATURE) | _BV(EN_DPL), 1);
+	rf_write_register(DYNPD,rf_read_register_1_byte(DYNPD) | _BV(DPL_P5) | _BV(DPL_P4) | _BV(DPL_P3) | _BV(DPL_P2) | _BV(DPL_P1) | _BV(DPL_P0), 1);
+}
+
+bool testRPD(){
+
+	return ( rf_read_register_1_byte(RF_RPD) & 1 ) ;
+}
+
+bool testCarrier(){
+	return ( rf_read_register_1_byte(CD) & 1 );
 }
 
 rf24_pa_dbm_e getPALevel(){

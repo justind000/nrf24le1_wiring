@@ -2,8 +2,8 @@
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// License as published by the Free Software Foundation, either version 
+// 3 of the License, or (at your option) any later version.
 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,93 +33,53 @@
 
 #define debugPrint(fmt, ...) do { if (DEBUG) printf_small(fmt, __VA_ARGS__); } while (0)
 #define debugPrintLn(fmt, ...) do { if (DEBUG) printf_small(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
+#define ISR(p1) void isr##p1() __interrupt(p1)
 
-//Input / Output
-#define digitalWrite gpio_pin_val_write
+//Data
+// #define bit()
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+// #define bitWrite()
+#define highByte(w) ((uint8_t) ((w) >> 8))
+#define lowByte(w) ((uint8_t) ((w) & 0xff))
+#define makeWord(msb, lsb) (msb << 8 | lsb)
+
+//Character classification - done
+#define isAlpha isalpha
+#define isAlphaNumeric isalnum
+#define isASCII isascii
+#define isControl iscntrl
+#define isDigit isdigit
+#define isGraph isgraph 
+#define isHexadecimalDigit isxdigit 
+#define isLowerCase islower 
+#define isPrintable isprint 
+#define isPunct ispunct 
+#define isSpace isspace
+#define isUpperCase isupper 
+#define isWhitespace isspace 
+
+//Pin digital Input/Output - done
 #define digitalRead gpio_pin_val_read
+#define digitalWrite gpio_pin_val_write
 #define pinMode gpio_pin_configure
 #define HIGH_POWER GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_HIGH_DRIVE_STRENGTH
 #define NORMAL_POWER GPIO_PIN_CONFIG_OPTION_PIN_MODE_OUTPUT_BUFFER_NORMAL_DRIVE_STRENGTH
 #define PULLDOWN GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_DOWN_RESISTOR
 #define PULLUP GPIO_PIN_CONFIG_OPTION_PIN_MODE_INPUT_BUFFER_ON_PULL_UP_RESISTOR
-#define analogWrite pwm_start
+
+//Pin analog Input - done
+#define INTERNAL1V2 ADC_CONFIG_OPTION_REF_SELECT_INT_1_2V
+#define VDD ADC_CONFIG_OPTION_REF_SELECT_VDD
+#define EXTERNAL3 ADC_CONFIG_OPTION_REF_SELECT_EXT_AIN3
+#define EXTERNAL9 ADC_CONFIG_OPTION_REF_SELECT_EXT_AIN9
 #define analogRead adc_start_single_conversion_get_value
+#define analogReference(p1) adc_configure ((uint16_t)ADC_CONFIG_OPTION_RESOLUTION_12_BITS| p1 |ADC_CONFIG_OPTION_RESULT_JUSTIFICATION_RIGHT)
 
-//Data
-#define lowByte(w) ((uint8_t) ((w) & 0xff))
-#define highByte(w) ((uint8_t) ((w) >> 8))
-#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+//Pin PWM (analog) Output - done
+#define analogWrite(p1, p2) pwm_start(p1, p2)
+#define noAnalogWrite(p1) pwm_start(p1, 0)
 
-
-//Interrupts
-#define attachInterrupt(p1, p2) interrupt_configure_ifp(p1, p2 | INTERRUPT_IFP_CONFIG_OPTION_ENABLE)
-#define detachInterrupt(p1) interrupt_configure_ifp(p1, INTERRUPT_IFP_CONFIG_OPTION_DISABLE)
-#define ISR(p1) void isr##p1() __interrupt(p1)
-#define interrupts() interrupt_control_global_enable()
-#define noInterrupts() interrupt_control_global_disable()
-
-//Calculation
-#define abs(x) ((x)>0?(x):-(x))
-#define ceil ceilf
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-#define exp expf
-#define fabs fabsf 
-#define floor floorf 
-//#define fma 
-//#define fmax
-//#define fmin
-//#define fmod
-#define ldexp ldexpf 
-#define log logf 
-#define log10 log10f 
-//#define map
-#define max(a,b) ((a)>(b)?(a):(b))
-#define min(a,b) ((a)<(b)?(a):(b))
-#define pow powf 
-#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-//#define signbit
-#define sq(x) ((x)*(x))
-#define sqrt sqrtf 
-//#define square
-//#define trunc
-
-//Trigonometry
-#define acos acosf 
-#define asin asinf 
-#define atan atanf 
-#define atan2 atan2f 
-#define cos cosf 
-// #define degrees
-// #define hypot
-// #define radians
-#define sin sinf 
-#define sinh sinhf 
-#define tan tanf 
-#define tanh tanhf 
-
-//Constants
-#define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
-#define HIGH 1
-#define INPUT GPIO_PIN_CONFIG_OPTION_DIR_INPUT
-#define LOW 0
-// #define LSBFIRST
-// #define MSBFIRST
-#define OUTPUT GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT
-
-//Sleep modes
-#define ACTIVE PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
-#define STANDBY PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
-#define REGISTER_RET PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
-#define MEMORY_TIMER_ON PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
-#define MEMORY_TIMER_OFF PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
-#define DEEP_SLEEP PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
-
-#define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode) 
-
-//HW random - returns byte
-#define random rng_get_one_byte_and_turn_off
-
-//Time
+//Time - done
 #define delay delay_ms
 #define delayMilliseconds delay_us
 
@@ -149,6 +109,85 @@ void millisBegin()
 
 }
 #define millis() ml
+#define micros() ml*1000
+
+//Interrupts - done
+#define attachInterrupt(p1, p2) interrupt_configure_ifp(p1, p2 | INTERRUPT_IFP_CONFIG_OPTION_ENABLE)
+#define detachInterrupt(p1) interrupt_configure_ifp(p1, INTERRUPT_IFP_CONFIG_OPTION_DISABLE)
+#define interrupts() interrupt_control_global_enable()
+#define noInterrupts() interrupt_control_global_disable()
+
+//Serial
+#define serialPrint(fmt, ...) do { printf_small(fmt, __VA_ARGS__);} while (0)
+#define serialPrintLn(fmt, ...) do { printf_small(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
+void serialBegin();
+//serialAvailable
+//serialRead
+//serialWrite
+//serialPeek
+//serialFlush
+//serialEnd
+
+//Advanced Power Management - done
+#define ACTIVE PWR_CLK_MGMT_PWRDWN_MODE_ACTIVE
+#define STANDBY PWR_CLK_MGMT_PWRDWN_MODE_STANDBY
+#define REGISTER_RET PWR_CLK_MGMT_PWRDWN_MODE_REGISTER_RET
+#define MEMORY_TIMER_ON PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_ON
+#define MEMORY_TIMER_OFF PWR_CLK_MGMT_PWRDWN_MODE_MEMORY_RET_TMR_OFF
+#define DEEP_SLEEP PWR_CLK_MGMT_PWRDWN_MODE_DEEP_SLEEP
+#define sleep(mode) PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | mode) 
+#define noSleep() PWRDWN = ((PWRDWN & ~(PWRDWN_PWR_CNTL_MASK)) | ACTIVE) 
+
+//Calculation
+#define abs(x) ((x)>0?(x):-(x))
+#define ceil ceilf
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define exp expf
+#define fabs fabsf 
+#define floor floorf 
+//#define fma 
+//#define fmax
+//#define fmin
+//#define fmod
+#define ldexp ldexpf 
+#define log logf 
+#define log10 log10f 
+#define map(x, in_min, in_max, out_min, out_max) (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a,b) ((a)<(b)?(a):(b))
+#define pow powf 
+#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+//#define signbit
+#define sq(x) ((x)*(x))
+#define sqrt sqrtf 
+//#define square
+//#define trunc
+
+//Trigonometry
+#define acos acosf 
+#define asin asinf 
+#define atan atanf 
+#define atan2 atan2f 
+#define cos cosf 
+// #define degrees
+// #define hypot
+// #define radians
+#define sin sinf 
+#define sinh sinhf 
+#define tan tanf 
+#define tanh tanhf 
+
+//HW random - returns a byte - done
+#define random rng_get_one_byte_and_turn_off
+
+//Constants - done
+#define FALLING INTERRUPT_IFP_CONFIG_OPTION_TYPE_FALLING_EDGE
+#define HIGH 1
+#define INPUT GPIO_PIN_CONFIG_OPTION_DIR_INPUT
+#define LOW 0
+#define LSBFIRST 0
+#define MSBFIRST 1
+#define OUTPUT GPIO_PIN_CONFIG_OPTION_DIR_OUTPUT
 
 //Pin definitions
 #define P0_0 GPIO_PIN_ID_P0_0
@@ -183,20 +222,7 @@ void millisBegin()
 #define P3_5 GPIO_PIN_ID_P3_5
 #define P3_6 GPIO_PIN_ID_P3_6
 
-//Character classification
-#define isAlpha isalpha
-#define isAlphaNumeric isalnum
-#define isASCII isascii
-#define isControl iscntrl
-#define isDigit isdigit
-#define isGraph isgraph 
-#define isHexadecimalDigit isxdigit 
-#define isLowerCase islower 
-#define isPrintable isprint 
-#define isPunct ispunct 
-#define isSpace isspace
-#define isUpperCase isupper 
-#define isWhitespace isspace 
+
 
 typedef unsigned int word;
 typedef uint8_t boolean;
@@ -206,7 +232,7 @@ void setup();
 void loop();
 void putchar(char c);
 char getchar();
-void serialBegin();
+
 uint8_t eepromRead(uint16_t address);
 void eepromWrite(uint16_t address, uint8_t value);
 w2_ack_nack_val_t wireWrite8(uint8_t slave_address, uint8_t data);
@@ -253,8 +279,7 @@ void serialBegin(){
 	uart_configure_8_n_1_38400();
 }
 
-#define serialPrint(fmt, ...) do { printf_small(fmt, __VA_ARGS__);} while (0)
-#define serialPrintLn(fmt, ...) do { printf_small(fmt, __VA_ARGS__); printf_tiny("\n\r"); } while (0)
+
 
 void putchar(char c)
 {
