@@ -107,8 +107,8 @@ Automatically set up in master mode at 400kHz. I would like this to be made more
 * ACTIVE
 * STANDBY
 * REGISTER_RET
-* MEMORY_RET_TMR_ON
-* MEMORY_RET_TMR_OFF
+* MEMORY_TIMER_ON
+* MEMORY_TIMER_OFF
 * DEEP_SLEEP
 
 ####Random Number Generator
