@@ -100,7 +100,7 @@ Automatically set up in master mode at 400kHz. I would like this to be made more
 `wireRead16(slave address, address)` returns W2_NACK_VAL or W2_ACK_VAL
 
 ####Watchdog
-`watchdogRun(millis)` will start the watchdog and cause a reset if not called before millis runs out. Does not work in deep sleep mode. 
+`watchdogRun(millis)` will start the watchdog and cause a reset if not called before millis runs out. Does not work in deep sleep mode. Minimum is 7.8125 ms, max is 512 seconds. 
 
 ####Sleep Modes
 `sleep(mode)` will enter the passed mode. Modes are:
