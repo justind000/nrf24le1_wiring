@@ -4,3 +4,6 @@
 [submodule "nRF24LE1_SDK"]
 	path = nRF24LE1_SDK
 	url = https://github.com/DeanCording/nRF24LE1_SDK.git
+[submodule "nrfprog"]
+	path = nrfprog
+	url = git@github.com:zerog2k/nrfprog.git

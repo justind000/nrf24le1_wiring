@@ -5,8 +5,8 @@ LFLAGS     := --iram-size 256 --code-loc 0x0000 --code-size 0x4000 --xram-loc 0x
 MAIN       := main
 
 FLASHER    := nrf24le1_flasher
-FLASH_BP    := ./nrfprog
-FLASH_BP_PORT   := /dev/ttyUSB0
+FLASH_BP    := nrfprog/nrfprog
+FLASH_BP_PORT   ?= /dev/ttyUSB0
 
 SDK_DIR            := nRF24LE1_SDK
 PINS               := 32
@@ -47,6 +47,9 @@ flasher:
 
 flash:
 	 $(FLASHER)/$(FLASHER) -c -w $(MAIN).ihx
+
+nrfprog_buspirate:
+	make -C nrfprog    
 
 flash_buspirate:
 	$(FLASH_BP) $(FLASH_BP_PORT) $(MAIN).ihx
