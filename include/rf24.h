@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include "reg24le1.h"
-#include "rf.h"
+#include <rf.h>
 #include "adc.h"
 #include "wiring.h"
 

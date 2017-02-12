@@ -1,0 +1,9 @@
+[submodule "nrf24le1_flasher"]
+	path = nrf24le1_flasher
+	url = git@github.com:zerog2k/nrf24le1_flasher.git
+[submodule "nRF24LE1_SDK"]
+	path = nRF24LE1_SDK
+	url = git@github.com:zerog2k/nRF24LE1_SDK.git
+[submodule "nrfprog"]
+	path = nrfprog
+	url = git@github.com:zerog2k/nrfprog.git
