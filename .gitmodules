@@ -3,7 +3,7 @@
 	url = git@github.com:zerog2k/nrf24le1_flasher.git
 [submodule "nRF24LE1_SDK"]
 	path = nRF24LE1_SDK
-	url = https://github.com/DeanCording/nRF24LE1_SDK.git
+	url = git@github.com:zerog2k/nRF24LE1_SDK.git
 [submodule "nrfprog"]
 	path = nrfprog
 	url = git@github.com:zerog2k/nrfprog.git
